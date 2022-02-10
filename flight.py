@@ -20,6 +20,9 @@ OPTI_IP = '192.168.0.99'
 CLIENT_ID = '192.168.1.166'
 CLIENT_PORT = '3500'
 
+# Logging level
+LOGLEVEL = logging.DEBUG
+
 # Specify the variables we want to log (all at 100 Hz)
 variables = [
     # State estimates (stock code)
@@ -169,6 +172,7 @@ class SimpleClient:
             json.dump(self.data, outfile, indent=4, sort_keys=False)
 
 def optitrack(queue: Queue, run_process: Value):
+    logging.info('Beginning socket listener')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind(('0.0.0.0', int(CLIENT_PORT)))
         logging.info(f'Starting socket listener')
@@ -193,6 +197,7 @@ def optitrack(queue: Queue, run_process: Value):
                     queue.put((x, y, z, qx, qy, qz, qw))
 
 def send_pose(client, queue: Queue):
+    logging.info('sending full pose')
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
@@ -212,10 +217,12 @@ if __name__ == '__main__':
     q = Queue()
     run_process = Value('b', 1)
     optitrack_process = Process(target=optitrack, args=(q, run_process))
+    logging.info('beginning OptiTrack process')
     optitrack_process.start()
 
     # Send position estimates from queue
     estimate_thread = Thread(target=send_pose, args=(client, q,))
+    logging.info('beginning estimate thread')
     estimate_thread.start()
     
     # Leave time at the start to initialize

@@ -204,7 +204,7 @@ def send_pose(client, queue: Queue):
 
 if __name__ == '__main__':
     # Initialize everything
-    logging.basicConfig(level=logging.ERROR)
+    logging.basicConfig(level=LOGLEVEL)
     cflib.crtp.init_drivers()
 
     # Create and start the client that will connect to the drone

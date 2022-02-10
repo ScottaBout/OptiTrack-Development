@@ -1,4 +1,5 @@
 import logging
+from threading import Thread
 import time
 import json
 import numpy as np
@@ -7,17 +8,17 @@ from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 import socket
 import struct
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Value
 
 # Specify the uri of the drone to which we want to connect (if your radio
 # channel is X, the uri should be 'radio://0/X/2M/E7E7E7E7E7')
 uri = 'radio://0/35/2M/E7E7E7E7E7'
 
 # Optitrack communication ports etc
-opti_port = '1511'
-opti_ip = '192.168.0.99'
-Client_ID = '192.168.1.166'
-Client_Port = '3500'
+OPTI_PORT = '1511'
+OPTI_IP = '192.168.0.99'
+CLIENT_ID = '192.168.1.166'
+CLIENT_PORT = '3500'
 
 # Specify the variables we want to log (all at 100 Hz)
 variables = [
@@ -98,6 +99,8 @@ class SimpleClient:
 
         # Reset the stock EKF
         self.cf.param.set_value('kalman.resetEstimation', 1)
+        time.sleep(1)
+        self.cf.param.set_value('kalman.resetEstimation', 0)
 
         # Enable the controller (1 for stock controller, 4 for ae483 controller)
         if self.use_controller: 
@@ -165,28 +168,34 @@ class SimpleClient:
         with open(filename, 'w') as outfile:
             json.dump(self.data, outfile, indent=4, sort_keys=False)
 
-    def OptiTrack(self, queue: Queue):
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.bind(('0.0.0.0', int(Client_Port)))
-            logging.info(f'Starting socket listener')
-            while True:
-                data = s.recvfrom(1024)[0]
-                if not data:
-                    logging.info(f'No data received')
-                    break
-                else:
-                    [a, b, c, d, e, f, g, h, i] = struct.unpack('fffffffff', data)
-                    x = -a
-                    y = c
-                    z = b
-                    qx = d
-                    qy = e
-                    qz = f
-                    qw = g
-                    bodyID = h
-                    framecount = i
-                    print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n bodyID = {bodyID}, framecount = {framecount}')
-                    self.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
+def optitrack(queue: Queue, run_process: Value):
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.bind(('0.0.0.0', int(CLIENT_PORT)))
+        logging.info(f'Starting socket listener')
+        while run_process.value == 1:
+            data = s.recvfrom(1024)[0]
+            if not data:
+                logging.info(f'No data received')
+                break
+            else:
+                [a, b, c, d, e, f, g, h, i] = struct.unpack('fffffffff', data)
+                x = -a
+                y = c
+                z = b
+                qx = d
+                qy = e
+                qz = f
+                qw = g
+                bodyID = h
+                framecount = i
+                print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n bodyID = {bodyID}, framecount = {framecount}')
+                if queue.empty():
+                    queue.put((x, y, z, qx, qy, qz, qw))
+
+def send_pose(client, queue: Queue):
+    while client.is_connected:
+        x, y, z, qx, qy, qz, qw = queue.get()
+        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
 
 if __name__ == '__main__':
     # Initialize everything
@@ -199,11 +208,16 @@ if __name__ == '__main__':
         print(f' ... connecting ...')
         time.sleep(1.0)
 
-    # Initialize Optitrack
+    # Listen to OptiTrack
     q = Queue()
-    process = Process(target=client.OptiTrack, args=(q,))
-    process.start
+    run_process = Value('b', 1)
+    optitrack_process = Process(target=optitrack, args=(q, run_process))
+    optitrack_process.start()
 
+    # Send position estimates from queue
+    estimate_thread = Thread(target=send_pose, args=(client, q,))
+    estimate_thread.start()
+    
     # Leave time at the start to initialize
     client.stop(1.0)
 
@@ -235,3 +249,7 @@ if __name__ == '__main__':
 
     # Write data from flight
     client.write_data('hardware_data.json')
+
+    estimate_thread.join()
+    run_process.value == 0
+    optitrack_process.join()

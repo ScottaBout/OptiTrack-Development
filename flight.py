@@ -21,7 +21,7 @@ CLIENT_ID = '192.168.1.166'
 CLIENT_PORT = '3500'
 
 # Logging level
-LOGLEVEL = logging.DEBUG
+LOGLEVEL = logging.INFO
 
 # Specify the variables we want to log (all at 100 Hz)
 variables = [
@@ -258,5 +258,5 @@ if __name__ == '__main__':
     client.write_data('hardware_data.json')
 
     estimate_thread.join()
-    run_process.value == 0
+    run_process.value = 0 
     optitrack_process.join()

@@ -201,6 +201,7 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
+        time.sleep(1)
 
 if __name__ == '__main__':
     # Initialize everything

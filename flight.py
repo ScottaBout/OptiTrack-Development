@@ -258,5 +258,5 @@ if __name__ == '__main__':
     client.write_data('hardware_data.json')
 
     estimate_thread.join()
-    run_process.value == 0
+    run_process.value = 0
     optitrack_process.join()

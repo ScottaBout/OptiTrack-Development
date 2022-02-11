@@ -221,9 +221,9 @@ if __name__ == '__main__':
     optitrack_process.start()
 
     # Send position estimates from queue
-    # estimate_thread = Thread(target=send_pose, args=(client, q,))
-    # logging.info('beginning estimate thread')
-    # estimate_thread.start()
+    estimate_thread = Thread(target=send_pose, args=(client, q,))
+    logging.info('beginning estimate thread')
+    estimate_thread.start()
     
     # Leave time at the start to initialize
     client.stop(1.0)
@@ -257,6 +257,6 @@ if __name__ == '__main__':
     # Write data from flight
     client.write_data('hardware_data.json')
 
-    # estimate_thread.join()
+    estimate_thread.join()
     run_process.value = 0 
     optitrack_process.join()

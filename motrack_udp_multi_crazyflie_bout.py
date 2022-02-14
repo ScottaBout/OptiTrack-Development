@@ -318,7 +318,7 @@ if __name__ == '__main__': #{{{1
                 #yaw = angles.theta;  # check this (is this psi?)
 
                 # Save position and orientation
-                mocap_state[i] = np.array([x, y, z, qx, qy, qz, qw])
+                mocap_state[i] = np.array([x, y, z, qx, qy, qz, qw, (angles.phi)*180/math.pi, (angles.theta)*180/math.pi, (angles.psi)*180/math.pi])
 
                 # If the rigid body is very close to the origin, assume it is untracked
                 # For this rigid body: set status to 0 if untracked, rigid body ID if tracked
@@ -340,7 +340,7 @@ if __name__ == '__main__': #{{{1
 
                 # Pack X,Y,Z,ROLL,YAW,PITCH,STATUS(either 0 or RBID),FRAMECOUNT
                 #print "Packing rigid body number %d" % i
-                pymsg[i] = struct.pack('fffffffff', mocap_state[i][0], mocap_state[i][1], mocap_state[i][2], mocap_state[i][3], mocap_state[i][4], mocap_state[i][5], mocap_state[i][6], status[i], frame_counter)  # sending rbid instead of status
+                pymsg[i] = struct.pack('ffffffffffff', mocap_state[i][0], mocap_state[i][1], mocap_state[i][2], mocap_state[i][3], mocap_state[i][4], mocap_state[i][5], mocap_state[i][6], mocap_state[i][7], mocap_state[i][8], mocap_state[i][9], status[i], frame_counter)  # sending rbid instead of status
 
             # SORT the states so that they are in ascending order - How does this work?
             #mydata = zip(rbid, pymsg)

@@ -109,7 +109,7 @@ class SimpleClient:
         if self.use_controller: 
             self.cf.param.set_value('stabilizer.controller', 4)
         else:
-            self.cf.param.set_value('stabilizer.controller', 4)
+            self.cf.param.set_value('stabilizer.controller', 1)
 
         # Enable the observer (0 for disable, 1 for enable)
         if self.use_observer:

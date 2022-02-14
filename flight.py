@@ -182,7 +182,7 @@ def optitrack(queue: Queue, run_process: Value):
                 logging.info(f'No data received')
                 break
             else:
-                [a, b, c, d, e, f, g, h, i] = struct.unpack('fffffffff', data)
+                [a, b, c, d, e, f, g, h, i, j, k, l] = struct.unpack('ffffffffffff', data)
                 x = -a
                 y = c
                 z = b
@@ -190,9 +190,12 @@ def optitrack(queue: Queue, run_process: Value):
                 qy = e
                 qz = f
                 qw = g
-                bodyID = h
-                framecount = i
-                print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n bodyID = {bodyID}, framecount = {framecount}')
+                roll = -h
+                yaw = i
+                pitch = -j
+                bodyID = k
+                framecount = l
+                print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
                 if queue.empty():
                     queue.put((x, y, z, qx, qy, qz, qw))
 

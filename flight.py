@@ -204,7 +204,7 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
-        time.sleep(5)
+        # time.sleep(5)
 
 if __name__ == '__main__':
     # Initialize everything
@@ -233,20 +233,24 @@ if __name__ == '__main__':
     client.stop(1.0)
 
     # Take off and hover (with zero yaw)
-    client.move(0.0, 0.0, 0.15, 0.0, 1.0)
-    client.move(0.0, 0.0, 0.50, 0.0, 1.0)
+    client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
+    time.sleep(1)
+    client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
+
+    # Correct positioning and pose
+    client.move(0.0, 0.0, 0.50, 0.0, 5.0)
 
     # Fly in a square five times (with a pause at each corner)
-    num_squares = 2
-    for i in range(num_squares):
-        #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
-        client.move(0.5, 0.0, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
-        client.move(0.5, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
-        client.move(0.0, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 0.0, 1.0)
+    # num_squares = 2
+    # for i in range(num_squares):
+    #     #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
+    #     client.move(0.5, 0.0, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
+    #     client.move(0.5, 0.5, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
+    #     client.move(0.0, 0.5, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 0.0, 1.0)
 
     # Go back to hover (with zero yaw) and prepare to land
     client.move(0.0, 0.0, 0.50, 0.0, 1.0)

@@ -183,8 +183,8 @@ def optitrack(queue: Queue, run_process: Value):
                 break
             else:
                 [a, b, c, d, e, f, g, h, i, j, k, l] = struct.unpack('ffffffffffff', data)
-                x = a
-                y = -c
+                x = -a
+                y = c
                 z = b
                 qx = d
                 qy = e

@@ -100,11 +100,6 @@ class SimpleClient:
                 for v in logconf.variables:
                     print(f' - {v.name}')
 
-        # Reset the stock EKF
-        self.cf.param.set_value('kalman.resetEstimation', 1)
-        time.sleep(1)
-        self.cf.param.set_value('kalman.resetEstimation', 0)
-
         # Enable the controller (1 for stock controller, 4 for ae483 controller)
         if self.use_controller: 
             self.cf.param.set_value('stabilizer.controller', 4)
@@ -116,6 +111,11 @@ class SimpleClient:
             self.cf.param.set_value('ae483par.use_observer', 1)
         else:
             self.cf.param.set_value('stabilizer.estimator', 2)
+
+        # Reset the stock EKF
+        self.cf.param.set_value('kalman.resetEstimation', 1)
+        time.sleep(0.1)
+        self.cf.param.set_value('kalman.resetEstimation', 0)
 
     def connection_failed(self, uri, msg):
         print(f'Connection to {uri} failed: {msg}')

@@ -115,7 +115,7 @@ class SimpleClient:
         # Reset the stock EKF
         self.cf.param.set_value('kalman.resetEstimation', 1)
         time.sleep(0.1)
-        self.cf.param.set_value('kalman.resetEstimation', 0)
+        # self.cf.param.set_value('kalman.resetEstimation', 0)
 
     def connection_failed(self, uri, msg):
         print(f'Connection to {uri} failed: {msg}')

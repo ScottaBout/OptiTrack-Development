@@ -253,25 +253,27 @@ if __name__ == '__main__':
     client.stop(2.0)
 
     # Take off and hover (with zero yaw)
+    logging.info('Take off initiated')
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
     time.sleep(1.0)
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
 
     # Correct positioning and pose
+    logging.info('Beginning move')
     client.move(0.0, 0.0, 0.50, 0.0, 5.0)
 
     # Fly in a square five times (with a pause at each corner)
-    num_squares = 2
-    for i in range(num_squares):
-        #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
-        client.move(0.5, 0.0, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
-        client.move(0.5, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
-        client.move(0.0, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 0.0, 1.0)
+    # num_squares = 2
+    # for i in range(num_squares):
+    #     #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
+    #     client.move(0.5, 0.0, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
+    #     client.move(0.5, 0.5, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
+    #     client.move(0.0, 0.5, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 0.0, 1.0)
 
     # Go back to hover (with zero yaw) and prepare to land
     client.move(0.0, 0.0, 0.50, 0.0, 1.0)

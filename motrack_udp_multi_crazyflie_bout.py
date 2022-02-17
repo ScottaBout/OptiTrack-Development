@@ -374,7 +374,7 @@ if __name__ == '__main__': #{{{1
             # SEND filter_state over UDP
             if frame_counter % 25 == 0:
                 printnow = 1
-                print "rbid       status      x          z          yaw"
+                print "rbid    status    x    y    z    roll    yaw     pitch"
             else:
                 printnow = 0
             for i in range(nRigidBodies):
@@ -385,7 +385,7 @@ if __name__ == '__main__': #{{{1
                     if printnow == 1:
                         print "Sending to: %s" % (address_list[rbid[i]-1])
                 if printnow == 1:
-                    print "%.0f         %.0f          %.3f       %.3f       %.3f" % (rbid[i],status[i],mocap_state[i][0], mocap_state[i][2], mocap_state[i][4])
+                    print "%.0f         %.0f          %.3f       %.3f       %.3f         %.3f       %.3f       %.3f" % (rbid[i], status[i], mocap_state[i][0], mocap_state[i][1], mocap_state[i][2], mocap_state[i][3], mocap_state[i][4], mocap_state[i][5])
 
             frame_counter = frame_counter + 1
 

@@ -171,22 +171,22 @@ class SimpleClient:
         with open(filename, 'w') as outfile:
             json.dump(self.data, outfile, indent=4, sort_keys=False)
 
-def reset_estimator(client):
-    logging.info('Resetting Kalman Filter')
-    client.cf.param.set_value('kalman.resetEstimation', '1')
-    time.sleep(0.1)
-    client.cf.param.set_value('kalman.resetEstimation', '0')
+    def reset_estimator(self):
+        logging.info('Resetting Kalman Filter')
+        self.cf.param.set_value('kalman.resetEstimation', '1')
+        time.sleep(0.1)
+        self.cf.param.set_value('kalman.resetEstimation', '0')
 
-    # time.sleep(1)
-    #wait_for_position_estimator(cf)
+        # time.sleep(1)
+        #wait_for_position_estimator(cf)
 
-def activate_kalman_estimator(client):
-    logging.info('Activating Kalman Filter')
-    client.cf.param.set_value('stabilizer.estimator', '2')
+    def activate_kalman_estimator(self):
+        logging.info('Activating Kalman Filter')
+        self.cf.param.set_value('stabilizer.estimator', '2')
 
-    # Set the std deviation for the quaternion data pushed into the
-    # kalman filter. The default value seems to be a bit too low.
-    client.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
+        # Set the std deviation for the quaternion data pushed into the
+        # kalman filter. The default value seems to be a bit too low.
+        self.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
 
 def optitrack(queue: Queue, run_process: Value):
     logging.info('Beginning socket listener')
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     client = SimpleClient(uri, use_controller=False, use_observer=False)
     while not client.is_connected:
         print(f' ... connecting ...')
-        time.sleep(1.0)
+        time.sleep(2.0)
 
     # Listen to OptiTrack
     q = Queue()
@@ -241,8 +241,8 @@ if __name__ == '__main__':
     logging.info('beginning OptiTrack process')
     optitrack_process.start()
 
-    activate_kalman_estimator(client)
-    reset_estimator(client)
+    client.activate_kalman_estimator()
+    client.reset_estimator()
 
     # Send position estimates from queue
     estimate_thread = Thread(target=send_pose, args=(client, q,))

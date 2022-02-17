@@ -207,8 +207,8 @@ def optitrack(queue: Queue, run_process: Value):
                 qy = e
                 qz = f
                 qw = g
-                roll = -h
-                yaw = i
+                roll = h
+                yaw = -i
                 pitch = -j
                 bodyID = k
                 framecount = l

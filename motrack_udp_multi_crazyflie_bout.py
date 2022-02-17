@@ -374,7 +374,7 @@ if __name__ == '__main__': #{{{1
             # SEND filter_state over UDP
             if frame_counter % 25 == 0:
                 printnow = 1
-                print "rbid    status    x    y    z    roll    yaw     pitch"
+                print "rbid    status       x          y          z         roll         yaw           pitch"
             else:
                 printnow = 0
             for i in range(nRigidBodies):

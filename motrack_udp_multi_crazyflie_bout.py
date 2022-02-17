@@ -385,7 +385,7 @@ if __name__ == '__main__': #{{{1
                     if printnow == 1:
                         print "Sending to: %s" % (address_list[rbid[i]-1])
                 if printnow == 1:
-                    print "%.0f         %.0f          %.3f       %.3f       %.3f         %.3f       %.3f       %.3f" % (rbid[i], status[i], mocap_state[i][0], mocap_state[i][1], mocap_state[i][2], mocap_state[i][3], mocap_state[i][4], mocap_state[i][5])
+                    print "%.0f         %.0f          %.3f       %.3f       %.3f         %.3f       %.3f       %.3f" % (rbid[i], status[i], mocap_state[i][0], mocap_state[i][1], mocap_state[i][2], mocap_state[i][7], mocap_state[i][8], mocap_state[i][9])
 
             frame_counter = frame_counter + 1
 

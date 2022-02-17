@@ -214,14 +214,14 @@ def optitrack(queue: Queue, run_process: Value):
                 framecount = l
                 print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
                 if queue.empty():
-                    queue.put((x, y, z, qx, qy, qz, qw))
+                    queue.put((x, y, z)) # , qx, qy, qz, qw))
 
 def send_pose(client, queue: Queue):
     logging.info('sending full pose')
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         logging.info(f'sending x = {x}, y = {y}, z = {z}, qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw}')
-        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
+        client.cf.extpos.send_extpos(x, y, z) # , qx, qy, qz, qw)
         # time.sleep(5)
 
 if __name__ == '__main__':

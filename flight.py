@@ -106,16 +106,16 @@ class SimpleClient:
         else:
             self.cf.param.set_value('stabilizer.controller', 1)
 
-        # Enable the observer (0 for disable, 1 for enable)
-        if self.use_observer:
-            self.cf.param.set_value('ae483par.use_observer', 1)
-        else:
-            self.cf.param.set_value('stabilizer.estimator', 2)
-
-        # Reset the stock EKF
-        self.cf.param.set_value('kalman.resetEstimation', 1)
-        time.sleep(0.1)
-        # self.cf.param.set_value('kalman.resetEstimation', 0)
+        # # Enable the observer (0 for disable, 1 for enable)
+        # if self.use_observer:
+        #     self.cf.param.set_value('ae483par.use_observer', 1)
+        # else:
+        #     self.cf.param.set_value('stabilizer.estimator', 2)
+        #
+        # # Reset the stock EKF
+        # self.cf.param.set_value('kalman.resetEstimation', 1)
+        # time.sleep(0.1)
+        # # self.cf.param.set_value('kalman.resetEstimation', 0)
 
     def connection_failed(self, uri, msg):
         print(f'Connection to {uri} failed: {msg}')
@@ -171,6 +171,23 @@ class SimpleClient:
         with open(filename, 'w') as outfile:
             json.dump(self.data, outfile, indent=4, sort_keys=False)
 
+def reset_estimator(client):
+    logging.info('Resetting Kalman Filter')
+    client.cf.param.set_value('kalman.resetEstimation', '1')
+    time.sleep(0.1)
+    client.cf.param.set_value('kalman.resetEstimation', '0')
+
+    # time.sleep(1)
+    #wait_for_position_estimator(cf)
+
+def activate_kalman_estimator(client):
+    logging.info('Activating Kalman Filter')
+    client.cf.param.set_value('stabilizer.estimator', '2')
+
+    # Set the std deviation for the quaternion data pushed into the
+    # kalman filter. The default value seems to be a bit too low.
+    client.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
+
 def optitrack(queue: Queue, run_process: Value):
     logging.info('Beginning socket listener')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -224,18 +241,22 @@ if __name__ == '__main__':
     logging.info('beginning OptiTrack process')
     optitrack_process.start()
 
+    activate_kalman_estimator(client)
+    reset_estimator(client)
+
     # Send position estimates from queue
     estimate_thread = Thread(target=send_pose, args=(client, q,))
     logging.info('beginning estimate thread')
     estimate_thread.start()
     
-    # Leave time at the start to initialize
-    client.stop(1.0)
+    # Leave time at the start to initialize and allow kalman filter to converge
+    client.stop(2.0)
 
     # Take off and hover (with zero yaw)
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
-    time.sleep(1)
+    time.sleep(1.0)
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
+    time.sleep(5.0)
 
     # Correct positioning and pose
     client.move(0.0, 0.0, 0.50, 0.0, 5.0)

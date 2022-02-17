@@ -212,7 +212,7 @@ def optitrack(queue: Queue, run_process: Value):
                 pitch = -j
                 bodyID = k
                 framecount = l
-                print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
+                # print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
                 if queue.empty():
                     queue.put((x, y, z)) # , qx, qy, qz, qw))
 
@@ -220,7 +220,7 @@ def send_pose(client, queue: Queue):
     logging.info('sending full pose')
     while client.is_connected:
         x, y, z = queue.get()
-        logging.info(f'sending x = {x}, y = {y}, z = {z}')
+        # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         client.cf.extpos.send_extpos(x, y, z) # , qx, qy, qz, qw)
         # time.sleep(5)
 
@@ -255,11 +255,16 @@ if __name__ == '__main__':
 
     # Take off and hover (with zero yaw)
     logging.info('Take off initiated')
+    logging.info('takeoff hover 0.15')
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
-    time.sleep(1.0)
+    #time.sleep(1.0)
+    logging.info('takeoff hover 0.5')
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
+    logging.info('takeoff hover 0.5')
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
+    logging.info('landing hover 0.25')
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.25)
+    logging.info('landing hover 0.15')
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
 
     # Correct positioning and pose

@@ -189,14 +189,14 @@ class SimpleClient:
         self.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
 
 def optitrack(queue: Queue, run_process: Value):
-    logging.info('Beginning socket listener')
+    print('Beginning socket listener')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind(('0.0.0.0', int(CLIENT_PORT)))
-        logging.info(f'Starting socket listener')
+        print(f'Starting socket listener')
         while run_process.value == 1:
             data = s.recvfrom(1024)[0]
             if not data:
-                logging.info(f'No data received')
+                print(f'No data received')
                 break
             else:
                 [a, b, c, d, e, f, g, h, i, j, k, l] = struct.unpack('ffffffffffff', data)
@@ -220,6 +220,7 @@ def send_pose(client, queue: Queue):
     logging.info('sending full pose')
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
+        logging.info(f'sending x = {x}, y = {y}, z = {z}, qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw}')
         client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
         # time.sleep(5)
 

@@ -219,8 +219,8 @@ def optitrack(queue: Queue, run_process: Value):
 def send_pose(client, queue: Queue):
     logging.info('sending full pose')
     while client.is_connected:
-        x, y, z, qx, qy, qz, qw = queue.get()
-        logging.info(f'sending x = {x}, y = {y}, z = {z}, qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw}')
+        x, y, z = queue.get()
+        logging.info(f'sending x = {x}, y = {y}, z = {z}')
         client.cf.extpos.send_extpos(x, y, z) # , qx, qy, qz, qw)
         # time.sleep(5)
 

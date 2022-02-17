@@ -188,6 +188,29 @@ class SimpleClient:
         # kalman filter. The default value seems to be a bit too low.
         self.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
 
+
+def get_quaternion_from_euler(roll, yaw, pitch):
+    """
+    Convert an Euler angle to a quaternion.
+
+    Input
+      :param roll: The roll (rotation around x-axis) angle in radians.
+      :param pitch: The pitch (rotation around y-axis) angle in radians.
+      :param yaw: The yaw (rotation around z-axis) angle in radians.
+
+    Output
+      :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+    """
+    roll = np.deg2rad(roll)
+    yaw = np.deg2rad(yaw)
+    pitch = np.deg2rad(pitch)
+    qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+    qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
+    qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2)
+    qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+
+    return [qx, qy, qz, qw]
+
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning socket listener')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -213,15 +236,20 @@ def optitrack(queue: Queue, run_process: Value):
                 bodyID = k
                 framecount = l
                 # print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
+                quat = get_quaternion_from_euler(roll, yaw, pitch)
+                quat_x = quat[0]
+                quat_y = quat[1]
+                quat_z = quat[2]
+                quat_w = quat[3]
                 if queue.empty():
-                    queue.put((x, y, z)) # , qx, qy, qz, qw))
+                    queue.put((x, y, z, quat_x, quat_y, quat_z, quat_w))
 
 def send_pose(client, queue: Queue):
     logging.info('sending full pose')
     while client.is_connected:
-        x, y, z = queue.get()
+        x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
-        client.cf.extpos.send_extpos(x, y, z) # , qx, qy, qz, qw)
+        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
         # time.sleep(5)
 
 if __name__ == '__main__':
@@ -277,20 +305,20 @@ if __name__ == '__main__':
     # client.move(0.0, 0.0, 0.50, 0.0, 5.0)
 
     # Fly in a square five times (with a pause at each corner)
-    num_squares = 2
-    for i in range(num_squares):
-        #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
-        client.move(0.5, 0.0, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
-        client.move(0.5, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
-        client.move(0.0, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 0.0, 1.0)
-
-    # Go back to hover (with zero yaw) and prepare to land
-    client.move(0.0, 0.0, 0.50, 0.0, 1.0)
-    client.move(0.0, 0.0, 0.15, 0.0, 1.0)
+    # num_squares = 2
+    # for i in range(num_squares):
+    #     #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
+    #     client.move(0.5, 0.0, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
+    #     client.move(0.5, 0.5, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
+    #     client.move(0.0, 0.5, 0.5, 0.0, 1.0)
+    #     #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 0.0, 1.0)
+    #
+    # # Go back to hover (with zero yaw) and prepare to land
+    # client.move(0.0, 0.0, 0.50, 0.0, 1.0)
+    # client.move(0.0, 0.0, 0.15, 0.0, 1.0)
 
     # Land
     client.stop(1.0)

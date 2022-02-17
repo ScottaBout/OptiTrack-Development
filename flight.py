@@ -256,7 +256,7 @@ if __name__ == '__main__':
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
     time.sleep(1.0)
     client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
-    time.sleep(5.0)
+    client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
 
     # Correct positioning and pose
     client.move(0.0, 0.0, 0.50, 0.0, 5.0)

@@ -194,9 +194,9 @@ def get_quaternion_from_euler(roll, yaw, pitch):
     Convert an Euler angle to a quaternion.
 
     Input
-      :param roll: The roll (rotation around x-axis) angle in radians.
-      :param pitch: The pitch (rotation around y-axis) angle in radians.
-      :param yaw: The yaw (rotation around z-axis) angle in radians.
+      :param roll: The roll (rotation around x-axis) angle in degrees.
+      :param pitch: The pitch (rotation around y-axis) angle in degrees.
+      :param yaw: The yaw (rotation around z-axis) angle in degrees.
 
     Output
       :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
@@ -210,6 +210,16 @@ def get_quaternion_from_euler(roll, yaw, pitch):
     qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
 
     return [qx, qy, qz, qw]
+
+def get_euler_from_quaternion(q):
+    yaw = np.arctan2(2 * (q[1] * q[2]+q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
+    yaw = np.rad2deg(yaw)
+    pitch = np.arcsin(-2 * (q[1] * q[3] - q[0] * q[2]))
+    pitch = np.rad2deg(pitch)
+    roll = np.arctan2(2 * (q[2] * q[3]+q[0] * q[1]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
+    roll = np.rad2deg(roll)
+
+    return roll, yaw, pitch
 
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning socket listener')

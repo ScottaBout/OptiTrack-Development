@@ -308,6 +308,7 @@ if __name__ == '__main__':
     client.move(0.0, 0.0, 0.15, 0.0, 2)
     client.move(0.0, 0.0, 0.25, 0.0, 2)
     client.move(0.0, 0.0, 0.5, 0.0, 5)
+    client.move(0.0, 0.0, 0.75, 0.0, 2)
     # client.move(0.0, 0.0, 0.25, 0.0, 2)
 
     # Correct positioning and pose

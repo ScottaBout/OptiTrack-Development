@@ -9,6 +9,7 @@ from cflib.crazyflie.log import LogConfig
 import socket
 import struct
 from multiprocessing import Process, Queue, Value
+from scipy.spatial.transform import Rotation
 
 # Specify the uri of the drone to which we want to connect (if your radio
 # channel is X, the uri should be 'radio://0/X/2M/E7E7E7E7E7')
@@ -189,7 +190,7 @@ class SimpleClient:
         self.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
 
 
-def get_quaternion_from_euler(roll, yaw, pitch):
+def get_quaternion_from_euler(roll, pitch, yaw):
     """
     Convert an Euler angle to a quaternion.
 
@@ -201,13 +202,17 @@ def get_quaternion_from_euler(roll, yaw, pitch):
     Output
       :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
     """
-    roll = np.deg2rad(roll)
-    yaw = np.deg2rad(yaw)
-    pitch = np.deg2rad(pitch)
-    qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
-    qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2)
-    qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2)
-    qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(roll / 2) * np.sin(pitch / 2) * np.sin(yaw / 2)
+    # roll = np.deg2rad(roll)
+    # yaw = np.deg2rad(yaw)
+    # pitch = np.deg2rad(pitch)
+    # Create a rotation object from Euler angles specifying axes of rotation
+    rot = Rotation.from_euler('xyz', [roll, pitch, yaw], degrees=True)
+    # Convert to quaternions and print
+    rot_quat = rot.as_quat()
+    qx = rot_quat[0]
+    qy = rot_quat[1]
+    qz = rot_quat[2]
+    qw = rot_quat[3]
 
     return [qx, qy, qz, qw]
 
@@ -246,20 +251,20 @@ def optitrack(queue: Queue, run_process: Value):
                 bodyID = k
                 framecount = l
                 # print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
-                quat = get_quaternion_from_euler(roll, yaw, pitch)
+                quat = get_quaternion_from_euler(roll, pitch, yaw)
                 quat_x = quat[0]
                 quat_y = quat[1]
                 quat_z = quat[2]
                 quat_w = quat[3]
                 if queue.empty():
-                    queue.put((x, y, z)) # , quat_x, quat_y, quat_z, quat_w))
+                    queue.put((x, y, z, quat_x, quat_y, quat_z, quat_w))
 
 def send_pose(client, queue: Queue):
     logging.info('sending full pose')
     while client.is_connected:
-        x, y, z = queue.get()
+        x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
-        client.cf.extpos.send_extpos(x, y, z) # , qx, qy, qz, qw)
+        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
         # time.sleep(5)
 
 if __name__ == '__main__':
@@ -316,7 +321,7 @@ if __name__ == '__main__':
     # client.move(0.0, 0.0, 0.50, 0.0, 5.0)
 
     # Fly in a square five times (with a pause at each corner)
-    num_squares = 5
+    num_squares = 2
     for i in range(num_squares):
         #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
         client.move(0.5, 0.0, 0.5, 0.0, 1.0)

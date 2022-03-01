@@ -264,7 +264,7 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
-        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw)
+        client.cf.extpos.send_extpose(x, y, z, qw, qx, qy, qz)
         # time.sleep(5)
 
 if __name__ == '__main__':

@@ -202,41 +202,41 @@ class SimpleClient:
         self.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
 
 
-def get_quaternion_from_euler(roll, pitch, yaw):
-    """
-    Convert an Euler angle to a quaternion.
+# def get_quaternion_from_euler(roll, pitch, yaw):
+#     """
+#     Convert an Euler angle to a quaternion.
+#
+#     Input
+#       :param roll: The roll (rotation around x-axis) angle in degrees.
+#       :param pitch: The pitch (rotation around y-axis) angle in degrees.
+#       :param yaw: The yaw (rotation around z-axis) angle in degrees.
+#
+#     Output
+#       :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+#     """
+#     # roll = np.deg2rad(roll)
+#     # yaw = np.deg2rad(yaw)
+#     # pitch = np.deg2rad(pitch)
+#     # Create a rotation object from Euler angles specifying axes of rotation
+#     rot = Rotation.from_euler('xyz', [roll, pitch, yaw], degrees=True)
+#     # Convert to quaternions and print
+#     rot_quat = rot.as_quat()
+#     qx = rot_quat[0]
+#     qy = rot_quat[1]
+#     qz = rot_quat[2]
+#     qw = rot_quat[3]
+#
+#     return [qx, qy, qz, qw]
 
-    Input
-      :param roll: The roll (rotation around x-axis) angle in degrees.
-      :param pitch: The pitch (rotation around y-axis) angle in degrees.
-      :param yaw: The yaw (rotation around z-axis) angle in degrees.
-
-    Output
-      :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
-    """
-    # roll = np.deg2rad(roll)
-    # yaw = np.deg2rad(yaw)
-    # pitch = np.deg2rad(pitch)
-    # Create a rotation object from Euler angles specifying axes of rotation
-    rot = Rotation.from_euler('xyz', [roll, pitch, yaw], degrees=True)
-    # Convert to quaternions and print
-    rot_quat = rot.as_quat()
-    qx = rot_quat[0]
-    qy = rot_quat[1]
-    qz = rot_quat[2]
-    qw = rot_quat[3]
-
-    return [qx, qy, qz, qw]
-
-def get_euler_from_quaternion(q):
-    yaw = np.arctan2(2 * (q[1] * q[2]+q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
-    yaw = np.rad2deg(yaw)
-    pitch = np.arcsin(-2 * (q[1] * q[3] - q[0] * q[2]))
-    pitch = np.rad2deg(pitch)
-    roll = np.arctan2(2 * (q[2] * q[3]+q[0] * q[1]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
-    roll = np.rad2deg(roll)
-
-    return roll, yaw, pitch
+# def get_euler_from_quaternion(q):
+#     yaw = np.arctan2(2 * (q[1] * q[2]+q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
+#     yaw = np.rad2deg(yaw)
+#     pitch = np.arcsin(-2 * (q[1] * q[3] - q[0] * q[2]))
+#     pitch = np.rad2deg(pitch)
+#     roll = np.arctan2(2 * (q[2] * q[3]+q[0] * q[1]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
+#     roll = np.rad2deg(roll)
+#
+#     return roll, yaw, pitch
 
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning socket listener')
@@ -253,23 +253,27 @@ def optitrack(queue: Queue, run_process: Value):
                 x = -a
                 y = c
                 z = b
-                qx = d
-                qy = e
-                qz = f
-                qw = g
+                opti_x = d
+                opti_y = e
+                opti_z = f
+                opti_w = g
                 roll = -h
                 yaw = i
                 pitch = -j
                 bodyID = k
                 framecount = l
                 # print(f'x = {x}, y = {y}, z = {z} \n qx = {qx}, qy = {qy}, qz = {qz}, qw = {qw} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
-                quat = get_quaternion_from_euler(roll, pitch, yaw)
-                quat_x = quat[0]
-                quat_y = quat[1]
-                quat_z = quat[2]
-                quat_w = quat[3]
+                # quat = get_quaternion_from_euler(roll, pitch, yaw) # Convert quaternions from one frame to another quarnon transformation // week or 2 after spring break, x = -x, y = z, z = y
+                # quat_x = quat[0]
+                # quat_y = quat[1]
+                # quat_z = quat[2]
+                # quat_w = quat[3]
+                quad_x = -opti_x
+                quad_y = opti_z
+                quad_z = opti_y
+                quad_w = opti_w
                 if queue.empty():
-                    queue.put((x, y, z, quat_x, quat_y, quat_z, quat_w))
+                    queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
 
 def send_pose(client, queue: Queue):
     logging.info('sending full pose')
@@ -277,7 +281,7 @@ def send_pose(client, queue: Queue):
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
-        client.cf.extpos.send_extpose(x, y, z, qw, qx, qy, qz)
+        # client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
 
 if __name__ == '__main__':
@@ -307,7 +311,7 @@ if __name__ == '__main__':
     estimate_thread.start()
     
     # Leave time at the start to initialize and allow kalman filter to converge
-    client.stop(2.0)
+    client.stop(10.0)
 
     # Take off and hover (with zero yaw)
     logging.info('Take off initiated')
@@ -323,11 +327,9 @@ if __name__ == '__main__':
     # logging.info('landing hover 0.15')
     # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
 
-    client.move(0.0, 0.0, 0.15, 0.0, 2)
-    client.move(0.0, 0.0, 0.25, 0.0, 2)
-    client.move(0.0, 0.0, 0.5, 0.0, 5)
-    # client.move(0.0, 0.0, 0.75, 0.0, 2)
+    # client.move(0.0, 0.0, 0.15, 0.0, 2)
     # client.move(0.0, 0.0, 0.25, 0.0, 2)
+    # client.move(0.0, 0.0, 0.5, 0.0, 5)
 
     # Correct positioning and pose
     # logging.info('Beginning move')
@@ -336,18 +338,14 @@ if __name__ == '__main__':
     # Fly in a square five times (with a pause at each corner)
     num_squares = 2
     for i in range(num_squares):
-        #client.move_smooth([0.0, 0.0, 0.5], [0.5, 0.0, 0.5], 0.0, 2.0)
         client.move(0.5, 0.0, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.0, 0.5], [0.5, 0.5, 0.5], 0.0, 2.0)
         client.move(0.5, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.5, 0.5, 0.5], [0.0, 0.5, 0.5], 0.0, 2.0)
         client.move(0.0, 0.5, 0.5, 0.0, 1.0)
-        #client.move_smooth([0.0, 0.5, 0.5], [0.0, 0.0, 0.5], 0.0, 2.0)
         client.move(0.0, 0.0, 0.5, 0.0, 1.0)
 
     # Go back to hover (with zero yaw) and prepare to land
-    client.move(0.0, 0.0, 0.50, 0.0, 1.0)
-    client.move(0.0, 0.0, 0.15, 0.0, 1.0)
+    # client.move(0.0, 0.0, 0.50, 0.0, 1.0)
+    # client.move(0.0, 0.0, 0.15, 0.0, 1.0)
 
     # Land
     client.stop(1.0)

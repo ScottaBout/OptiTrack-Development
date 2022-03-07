@@ -340,9 +340,9 @@ if __name__ == '__main__':
     # Fly in a square five times (with a pause at each corner)
     num_squares = 2
     for i in range(num_squares):
-        client.move(1.0, 0.0, 0.5, 0.0, 2.0)
-        client.move(1.0, 1.0, 0.5, 0.0, 2.0)
-        client.move(0.0, 1.0, 0.5, 0.0, 2.0)
+        client.move(0.5, 0.0, 0.5, 0.0, 2.0)
+        client.move(0.5, 0.5, 0.5, 0.0, 2.0)
+        client.move(0.0, 0.5, 0.5, 0.0, 2.0)
         client.move(0.0, 0.0, 0.5, 0.0, 2.0)
 
     # Go back to hover (with zero yaw) and prepare to land

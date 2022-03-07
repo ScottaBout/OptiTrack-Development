@@ -37,6 +37,10 @@ variables = [
     'ae483log.v_y',
     'ae483log.v_z',
     # Measurements
+    'kalman.q0',
+    'kalman.q1',
+    'kalman.q2',
+    'kalman.q3',
     'ae483log.w_x',
     'ae483log.w_y',
     'ae483log.w_z',
@@ -132,6 +136,14 @@ class SimpleClient:
         for v in logconf.variables:
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
+            if logconf.variables == 'kalman.q0':
+                print(f'qw = {logconf.variables}')
+            elif logconf.variables == 'kalman.q1':
+                print(f'qx = {logconf.variables}')
+            elif logconf.variables == 'kalman.q2':
+                print(f'qy = {logconf.variables}')
+            elif logconf.variables == 'kalman.q3':
+                print(f'qz = {logconf.variables}')
 
     def log_error(self, logconf, msg):
         print(f'Error when logging {logconf}: {msg}')
@@ -264,6 +276,7 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
+        print(f'qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
         client.cf.extpos.send_extpose(x, y, z, qw, qx, qy, qz)
         # time.sleep(5)
 

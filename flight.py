@@ -134,16 +134,18 @@ class SimpleClient:
 
     def log_data(self, timestamp, data, logconf):
         for v in logconf.variables:
+            internal_kalman = []
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
-            if logconf.variables == 'kalman.q0':
-                print(f'qw = {logconf.variables}')
-            elif logconf.variables == 'kalman.q1':
-                print(f'qx = {logconf.variables}')
-            elif logconf.variables == 'kalman.q2':
-                print(f'qy = {logconf.variables}')
-            elif logconf.variables == 'kalman.q3':
-                print(f'qz = {logconf.variables}')
+            if v.name == 'kalman.q0':
+                internal_kalman.append(data[v.name])
+            elif v.name == 'kalman.q1':
+                internal_kalman.append(data[v.name])
+            elif v.name == 'kalman.q2':
+                internal_kalman.append(data[v.name])
+            elif v.name == 'kalman.q3':
+                internal_kalman.append(data[v.name])
+            print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
 
     def log_error(self, logconf, msg):
         print(f'Error when logging {logconf}: {msg}')
@@ -280,8 +282,8 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
-        print(f'qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
-        # client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
+        # print(f'OptiTrack PUSHING qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
+        client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
 
 if __name__ == '__main__':
@@ -327,9 +329,9 @@ if __name__ == '__main__':
     # logging.info('landing hover 0.15')
     # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
 
-    # client.move(0.0, 0.0, 0.15, 0.0, 2)
-    # client.move(0.0, 0.0, 0.25, 0.0, 2)
-    # client.move(0.0, 0.0, 0.5, 0.0, 5)
+    client.move(0.0, 0.0, 0.15, 0.0, 2)
+    client.move(0.0, 0.0, 0.25, 0.0, 2)
+    client.move(0.0, 0.0, 0.5, 0.0, 5)
 
     # Correct positioning and pose
     # logging.info('Beginning move')
@@ -344,8 +346,8 @@ if __name__ == '__main__':
         client.move(0.0, 0.0, 0.5, 0.0, 1.0)
 
     # Go back to hover (with zero yaw) and prepare to land
-    # client.move(0.0, 0.0, 0.50, 0.0, 1.0)
-    # client.move(0.0, 0.0, 0.15, 0.0, 1.0)
+    client.move(0.0, 0.0, 0.50, 0.0, 1.0)
+    client.move(0.0, 0.0, 0.15, 0.0, 1.0)
 
     # Land
     client.stop(1.0)

@@ -134,17 +134,17 @@ class SimpleClient:
 
     def log_data(self, timestamp, data, logconf):
         for v in logconf.variables:
-            internal_kalman = []
+            internal_kalman = np.zeros(4)
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
             if v.name == 'kalman.q0':
-                internal_kalman.append(data[v.name])
+                internal_kalman[0] = data[v.name]
             elif v.name == 'kalman.q1':
-                internal_kalman.append(data[v.name])
+                internal_kalman[1] = data[v.name]
             elif v.name == 'kalman.q2':
-                internal_kalman.append(data[v.name])
+                internal_kalman[2] = data[v.name]
             elif v.name == 'kalman.q3':
-                internal_kalman.append(data[v.name])
+                internal_kalman[3] = data[v.name]
             print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
 
     def log_error(self, logconf, msg):

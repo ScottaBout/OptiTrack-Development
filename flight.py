@@ -282,7 +282,7 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
-        # print(f'OptiTrack PUSHING qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
+        print(f'OptiTrack PUSHING qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
         client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
 

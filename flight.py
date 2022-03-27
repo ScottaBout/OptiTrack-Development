@@ -273,7 +273,7 @@ def optitrack(queue: Queue, run_process: Value):
                 # quat_y = quat[1]
                 # quat_z = quat[2]
                 # quat_w = quat[3]
-                quad_x = -opti_x
+                quad_x = opti_x
                 quad_y = opti_z
                 quad_z = opti_y
                 quad_w = opti_w
@@ -316,7 +316,7 @@ if __name__ == '__main__':
     estimate_thread.start()
     
     # Leave time at the start to initialize and allow kalman filter to converge
-    client.stop(10.0)
+    client.stop(5.0)
 
     # Take off and hover (with zero yaw)
     logging.info('Take off initiated')

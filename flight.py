@@ -248,6 +248,9 @@ def optitrack(queue: Queue, run_process: Value):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind(('0.0.0.0', int(CLIENT_PORT)))
         print(f'Starting socket listener')
+        if run_process.value == 0:
+            print('figure out why value is 0')
+
         while run_process.value == 1:
             data = s.recvfrom(1024)[0]
             if not data:

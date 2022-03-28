@@ -137,18 +137,18 @@ class SimpleClient:
         for v in logconf.variables:
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
-            if v.name == 'kalman.q0':
-                internal_kalman[0] = data[v.name]
-            elif v.name == 'kalman.q1':
-                internal_kalman[1] = data[v.name]
-            elif v.name == 'kalman.q2':
-                internal_kalman[2] = data[v.name]
-            elif v.name == 'kalman.q3':
-                internal_kalman[3] = data[v.name]
-
-            if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
-                print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
-                internal_kalman = np.zeros(4)
+            # if v.name == 'kalman.q0':
+            #     internal_kalman[0] = data[v.name]
+            # elif v.name == 'kalman.q1':
+            #     internal_kalman[1] = data[v.name]
+            # elif v.name == 'kalman.q2':
+            #     internal_kalman[2] = data[v.name]
+            # elif v.name == 'kalman.q3':
+            #     internal_kalman[3] = data[v.name]
+            #
+            # if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
+            #     print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
+            #     internal_kalman = np.zeros(4)
 
     def log_error(self, logconf, msg):
         print(f'Error when logging {logconf}: {msg}')
@@ -267,7 +267,7 @@ def optitrack(queue: Queue, run_process: Value):
                 pitch = -j
                 bodyID = k
                 framecount = l
-                print(f'x = {x}, y = {y}, z = {z} \n qx = {opti_x}, qy = {opti_y}, qz = {opti_z}, qw = {opti_w} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
+                #print(f'x = {x}, y = {y}, z = {z} \n qx = {opti_x}, qy = {opti_y}, qz = {opti_z}, qw = {opti_w} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
                 # quat = get_quaternion_from_euler(roll, pitch, yaw) # Convert quaternions from one frame to another quarnon transformation // week or 2 after spring break, x = -x, y = z, z = y
                 # quat_x = quat[0]
                 # quat_y = quat[1]
@@ -341,12 +341,12 @@ if __name__ == '__main__':
     # client.move(0.0, 0.0, 0.50, 0.0, 5.0)
 
     # Fly in a square five times (with a pause at each corner)
-    num_squares = 2
-    for i in range(num_squares):
-        client.move(0.5, 0.0, 0.5, 0.0, 2.0)
-        client.move(0.5, 0.5, 0.5, 0.0, 2.0)
-        client.move(0.0, 0.5, 0.5, 0.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 0.0, 2.0)
+    # num_squares = 2
+    # for i in range(num_squares):
+    #     client.move(0.5, 0.0, 0.5, 0.0, 2.0)
+    #     client.move(0.5, 0.5, 0.5, 0.0, 2.0)
+    #     client.move(0.0, 0.5, 0.5, 0.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 0.0, 2.0)
 
     # Go back to hover (with zero yaw) and prepare to land
     client.move(0.0, 0.0, 0.50, 0.0, 1.0)

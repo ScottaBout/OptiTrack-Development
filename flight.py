@@ -274,8 +274,8 @@ def optitrack(queue: Queue, run_process: Value):
                 # quat_z = quat[2]
                 # quat_w = quat[3]
                 quad_x = opti_x
-                quad_y = opti_z
-                quad_z = opti_y
+                quad_y = opti_y
+                quad_z = opti_z
                 quad_w = opti_w
                 if queue.empty():
                     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))

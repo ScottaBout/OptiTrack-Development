@@ -242,7 +242,7 @@ class SimpleClient:
 #     roll = np.rad2deg(roll)
 #
 #     return roll, yaw, pitch
-
+#
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning socket listener')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:

@@ -308,7 +308,9 @@ if __name__ == '__main__':
     optitrack_process.start()
 
     client.activate_kalman_estimator()
+    logging.info('activating kalman filter')
     client.reset_estimator()
+    logging.info('resetting kalman filter')
 
     # Send position estimates from queue
     estimate_thread = Thread(target=send_pose, args=(client, q,))

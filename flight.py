@@ -320,7 +320,7 @@ if __name__ == '__main__':
     estimate_thread.start()
     
     # Leave time at the start to initialize and allow kalman filter to converge
-    client.stop(5.0)
+    client.stop(30.0)
 
     # Take off and hover (with zero yaw)
     logging.info('Take off initiated')
@@ -336,9 +336,9 @@ if __name__ == '__main__':
     # logging.info('landing hover 0.15')
     # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
 
-    client.move(0.0, 0.0, 0.15, 0.0, 2)
-    client.move(0.0, 0.0, 0.25, 0.0, 2)
-    client.move(0.0, 0.0, 0.5, 0.0, 5)
+    # client.move(0.0, 0.0, 0.15, 0.0, 2)
+    # client.move(0.0, 0.0, 0.25, 0.0, 2)
+    # client.move(0.0, 0.0, 0.5, 0.0, 5)
 
     # Correct positioning and pose
     # logging.info('Beginning move')
@@ -353,8 +353,8 @@ if __name__ == '__main__':
     #     client.move(0.0, 0.0, 0.5, 0.0, 2.0)
 
     # Go back to hover (with zero yaw) and prepare to land
-    client.move(0.0, 0.0, 0.50, 0.0, 1.0)
-    client.move(0.0, 0.0, 0.15, 0.0, 1.0)
+    # client.move(0.0, 0.0, 0.50, 0.0, 1.0)
+    # client.move(0.0, 0.0, 0.15, 0.0, 1.0)
 
     # Land
     client.stop(1.0)

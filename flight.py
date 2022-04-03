@@ -146,9 +146,9 @@ class SimpleClient:
             elif v.name == 'kalman.q3':
                 internal_kalman[3] = data[v.name]
 
-            if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
-                print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
-                internal_kalman = np.zeros(4)
+            # if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
+            print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
+                # internal_kalman = np.zeros(4)
 
     def log_error(self, logconf, msg):
         print(f'Error when logging {logconf}: {msg}')
@@ -244,10 +244,10 @@ class SimpleClient:
 #     return roll, yaw, pitch
 #
 def optitrack(queue: Queue, run_process: Value):
-    print('Beginning socket listener')
+    print('Beginning optitrack socket listener')
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind(('0.0.0.0', int(CLIENT_PORT)))
-        print(f'Starting socket listener')
+        print(f'Starting optitrack socket listener')
         while run_process.value == 1:
             data = s.recvfrom(1024)[0]
             if not data:
@@ -279,15 +279,17 @@ def optitrack(queue: Queue, run_process: Value):
                 quad_w = opti_w
                 if queue.empty():
                     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+    print('Ending optitrack socket listener')
 
 def send_pose(client, queue: Queue):
-    logging.info('sending full pose')
+    print('starting send_pose thread')
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'OptiTrack PUSHING qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
         client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
+    print('Ending send_pose thread')
 
 if __name__ == '__main__':
     # Initialize everything

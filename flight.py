@@ -137,18 +137,18 @@ class SimpleClient:
         for v in logconf.variables:
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
-            # if v.name == 'kalman.q0':
-            #     internal_kalman[0] = data[v.name]
-            # elif v.name == 'kalman.q1':
-            #     internal_kalman[1] = data[v.name]
-            # elif v.name == 'kalman.q2':
-            #     internal_kalman[2] = data[v.name]
-            # elif v.name == 'kalman.q3':
-            #     internal_kalman[3] = data[v.name]
-            #
-            # if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
-            #     print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
-            #     internal_kalman = np.zeros(4)
+            if v.name == 'kalman.q0':
+                internal_kalman[0] = data[v.name]
+            elif v.name == 'kalman.q1':
+                internal_kalman[1] = data[v.name]
+            elif v.name == 'kalman.q2':
+                internal_kalman[2] = data[v.name]
+            elif v.name == 'kalman.q3':
+                internal_kalman[3] = data[v.name]
+
+            if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
+                print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
+                internal_kalman = np.zeros(4)
 
     def log_error(self, logconf, msg):
         print(f'Error when logging {logconf}: {msg}')

@@ -243,7 +243,7 @@ class SimpleClient:
 #     roll = np.arctan2(2 * (q[2] * q[3]+q[0] * q[1]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
 #     roll = np.rad2deg(roll)
 #
-#     return roll, yaw, pitch
+#     return roll, yaw, pitch ###
 #
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning optitrack socket listener')

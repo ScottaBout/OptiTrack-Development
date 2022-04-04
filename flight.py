@@ -41,6 +41,10 @@ variables = [
     'kalman.q1',
     'kalman.q2',
     'kalman.q3',
+    'stateEstimate.qx',
+    'stateEstimate.qy',
+    'stateEstimate.qz',
+    'stateEstimate.qw',
     'ae483log.w_x',
     'ae483log.w_y',
     'ae483log.w_z',
@@ -137,7 +141,7 @@ class SimpleClient:
         for v in logconf.variables:
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
-            if 'kalman' in v.name:
+            if 'stateEstimate' in v.name:
                 print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
             # if v.name == 'kalman.q0':
             #     internal_kalman[0] = data[v.name]

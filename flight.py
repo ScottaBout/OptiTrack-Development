@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation
 
 # Specify the uri of the drone to which we want to connect (if your radio
 # channel is X, the uri should be 'radio://0/X/2M/E7E7E7E7E7')
-uri = 'radio://0/35/2M/E7E7E7E7E7'
+uri = 'radio://0/43/2M/E7E7E7E7E7'
 
 # Optitrack communication ports etc
 OPTI_PORT = '1511'
@@ -294,7 +294,7 @@ def send_pose(client, queue: Queue):
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
-        client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
+        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
         # client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
     print('Ending send_pose thread')

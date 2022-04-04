@@ -254,6 +254,7 @@ class SimpleClient:
 #
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning optitrack socket listener')
+    skip_counter = 0
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
         s.bind(('0.0.0.0', int(CLIENT_PORT)))
         print(f'Starting optitrack socket listener')
@@ -287,7 +288,8 @@ def optitrack(queue: Queue, run_process: Value):
                 quad_y = -opti_z
                 quad_z = opti_y
                 quad_w = opti_w
-                if queue.empty():
+                skip_counter += 1
+                if skip_counter % 10 == 0 and queue.empty():
                     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
     print('Ending optitrack socket listener')
 
@@ -377,7 +379,7 @@ if __name__ == '__main__':
     client.disconnect()
 
     # Write data from flight
-    client.write_data('hardware_data.json')
+    # client.write_data('hardware_data.json')
 
     estimate_thread.join()
     run_process.value = 0 

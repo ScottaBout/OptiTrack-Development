@@ -266,7 +266,7 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
-        client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
+        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
     print('Ending send_pose thread')
 
 def current_milli_time():

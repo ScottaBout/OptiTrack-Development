@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation
 
 # Specify the uri of the drone to which we want to connect (if your radio
 # channel is X, the uri should be 'radio://0/X/2M/E7E7E7E7E7')
-uri = 'radio://0/35/2M/E7E7E7E7E7'
+uri = 'radio://0/43/2M/E7E7E7E7E7'
 
 # Optitrack communication ports etc
 OPTI_PORT = '1511'
@@ -343,12 +343,12 @@ if __name__ == '__main__':
     # client.move(0.0, 0.0, 0.50, 0.0, 5.0)
 
     # Fly in a square five times (with a pause at each corner)
-    # num_squares = 2
-    # for i in range(num_squares):
-    #     client.move(0.5, 0.0, 0.5, 0.0, 2.0)
-    #     client.move(0.5, 0.5, 0.5, 0.0, 2.0)
-    #     client.move(0.0, 0.5, 0.5, 0.0, 2.0)
-    #     client.move(0.0, 0.0, 0.5, 0.0, 2.0)
+    num_squares = 5
+    for i in range(num_squares):
+        client.move(0.75, 0.0, 0.5, 0.0, 2.0)
+        client.move(0.75, 0.75, 0.5, 0.0, 2.0)
+        client.move(0.0, 0.75, 0.5, 0.0, 2.0)
+        client.move(0.0, 0.0, 0.5, 0.0, 2.0)
 
     # Go back to hover (with zero yaw) and prepare to land
     client.move(0.0, 0.0, 0.50, 0.0, 1.0)

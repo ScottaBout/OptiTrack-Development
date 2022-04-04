@@ -1,4 +1,5 @@
 import logging
+import math
 from threading import Thread
 import time
 import json
@@ -9,7 +10,7 @@ from cflib.crazyflie.log import LogConfig
 import socket
 import struct
 from multiprocessing import Process, Queue, Value
-from scipy.spatial.transform import Rotation
+import quaternion
 
 # Specify the uri of the drone to which we want to connect (if your radio
 # channel is X, the uri should be 'radio://0/X/2M/E7E7E7E7E7')
@@ -217,6 +218,7 @@ class SimpleClient:
 #
 #     return roll, yaw, pitch ###
 #
+prev_quat = None
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning optitrack socket listener')
     skip_counter = 0
@@ -253,11 +255,18 @@ def optitrack(queue: Queue, run_process: Value):
                 quad_y = -opti_z
                 quad_z = opti_y
                 quad_w = opti_w
-                skip_counter += 1
-                # if skip_counter % 5 == 0 and queue.empty():
-                #     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+                angle = 0
+                global prev_quat
+                if prev_quat is not None:
+                    new_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
+                    rot = new_quat.conj() * prev_quat
+                    angle = math.acos(rot[0])
                 if queue.empty():
-                    queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+                    if abs(angle) < 0.5:
+                        queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+                    else:
+                        print(f'Skipped {new_quat} because {prev_quat} has angle {angle}')
+                prev_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
 
     print('Ending optitrack socket listener')
 

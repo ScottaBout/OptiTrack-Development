@@ -289,7 +289,7 @@ def optitrack(queue: Queue, run_process: Value):
                 quad_z = opti_y
                 quad_w = opti_w
                 skip_counter += 1
-                if skip_counter % 10 == 0 and queue.empty():
+                if skip_counter % 5 == 0 and queue.empty():
                     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
     print('Ending optitrack socket listener')
 
@@ -299,7 +299,7 @@ def send_pose(client, queue: Queue):
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
-        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
+        client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
         # client.cf.extpos.send_extpos(x, y, z, qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
     print('Ending send_pose thread')

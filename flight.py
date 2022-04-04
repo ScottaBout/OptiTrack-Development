@@ -260,7 +260,10 @@ def optitrack(queue: Queue, run_process: Value):
                 if prev_quat is not None:
                     new_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
                     rot = new_quat.conj() * prev_quat
-                    angle = math.acos(rot[0])
+                    norm = np.linalg.norm(quaternion.as_float_array(rot))
+                    if norm != 0:
+                        rot = rot / norm
+                    angle = math.acos(rot.w)
                 if queue.empty():
                     if abs(angle) < 0.5:
                         queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))

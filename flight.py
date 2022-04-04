@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation
 
 # Specify the uri of the drone to which we want to connect (if your radio
 # channel is X, the uri should be 'radio://0/X/2M/E7E7E7E7E7')
-uri = 'radio://0/43/2M/E7E7E7E7E7'
+uri = 'radio://0/35/2M/E7E7E7E7E7'
 
 # Optitrack communication ports etc
 OPTI_PORT = '1511'
@@ -26,16 +26,6 @@ LOGLEVEL = logging.INFO
 
 # Specify the variables we want to log (all at 100 Hz)
 variables = [
-    # State estimates (stock code)
-    'ae483log.o_x',
-    'ae483log.o_y',
-    'ae483log.o_z',
-    'ae483log.psi',
-    'ae483log.theta',
-    'ae483log.phi',
-    'ae483log.v_x',
-    'ae483log.v_y',
-    'ae483log.v_z',
     # Measurements
     'kalman.q0',
     'kalman.q1',
@@ -45,22 +35,10 @@ variables = [
     'stateEstimate.qy',
     'stateEstimate.qz',
     'stateEstimate.qw',
-    'ae483log.w_x',
-    'ae483log.w_y',
-    'ae483log.w_z',
-    'ae483log.n_x',
-    'ae483log.n_y',
-    'ae483log.r',
-    'ae483log.a_z',
     # Setpoint
     'ae483log.o_x_des',
     'ae483log.o_y_des',
     'ae483log.o_z_des',
-    # Motor power commands
-    'ae483log.m_1',
-    'ae483log.m_2',
-    'ae483log.m_3',
-    'ae483log.m_4',
 ]
 
 
@@ -78,6 +56,7 @@ class SimpleClient:
         self.cf.open_link(uri)
         self.is_connected = False
         self.data = {}
+        self.log_skip_counter = 0
 
     def connected(self, uri):
         print(f'Connected to {uri}')
@@ -137,27 +116,13 @@ class SimpleClient:
         self.is_connected = False
 
     def log_data(self, timestamp, data, logconf):
-        internal_kalman = np.zeros(4)
-        for v in logconf.variables:
-            self.data[v.name]['time'].append(timestamp)
-            self.data[v.name]['data'].append(data[v.name])
-            if 'stateEstimate' in v.name:
-                print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
-
-            if 'kalman' in v.name:
-                print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
-            # if v.name == 'kalman.q0':
-            #     internal_kalman[0] = data[v.name]
-            # elif v.name == 'kalman.q1':
-            #     internal_kalman[1] = data[v.name]
-            # elif v.name == 'kalman.q2':
-            #     internal_kalman[2] = data[v.name]
-            # elif v.name == 'kalman.q3':
-            #     internal_kalman[3] = data[v.name]
-
-            # if internal_kalman[0] != 0.0 and internal_kalman[1] != 0.0 and internal_kalman[2] != 0.0 and internal_kalman[3] != 0.0:
-            # print(f'INTERNAL qw = {internal_kalman[0]}, qx = {internal_kalman[1]}, qy = {internal_kalman[2]}, qz = {internal_kalman[3]}')
-                # internal_kalman = np.zeros(4)
+        self.log_skip_counter += 1
+        if self.log_skip_counter % 5 == 0:
+            for v in logconf.variables:
+                self.data[v.name]['time'].append(timestamp)
+                self.data[v.name]['data'].append(data[v.name])
+                if 'stateEstimate' in v.name or 'kalman' in v.name:
+                    print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
 
     def log_error(self, logconf, msg):
         print(f'Error when logging {logconf}: {msg}')
@@ -289,19 +254,19 @@ def optitrack(queue: Queue, run_process: Value):
                 quad_z = opti_y
                 quad_w = opti_w
                 skip_counter += 1
-                if skip_counter % 5 == 0 and queue.empty():
+                # if skip_counter % 5 == 0 and queue.empty():
+                #     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+                if queue.empty():
                     queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+
     print('Ending optitrack socket listener')
 
 def send_pose(client, queue: Queue):
     print('starting send_pose thread')
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
-        # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
         client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
-        # client.cf.extpos.send_extpos(x, y, z, qx, qy, qz, qw) # or send to controller
-        # time.sleep(5)
     print('Ending send_pose thread')
 
 def current_milli_time():
@@ -331,9 +296,9 @@ if __name__ == '__main__':
     logging.info('resetting kalman filter')
 
     # Send position estimates from queue
-    estimate_thread = Thread(target=send_pose, args=(client, q,))
+    send_pose_thread = Thread(target=send_pose, args=(client, q,))
     logging.info('beginning estimate thread')
-    estimate_thread.start()
+    send_pose_thread.start()
     
     # Leave time at the start to initialize and allow kalman filter to converge
     client.stop(5.0)
@@ -381,6 +346,6 @@ if __name__ == '__main__':
     # Write data from flight
     # client.write_data('hardware_data.json')
 
-    estimate_thread.join()
+    send_pose_thread.join()
     run_process.value = 0 
     optitrack_process.join()

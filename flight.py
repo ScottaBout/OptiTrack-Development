@@ -295,7 +295,7 @@ def send_pose(client, queue: Queue):
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
         client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
-        # client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
+        # client.cf.extpos.send_extpos(x, y, z, qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
     print('Ending send_pose thread')
 

@@ -138,7 +138,7 @@ class SimpleClient:
             self.data[v.name]['time'].append(timestamp)
             self.data[v.name]['data'].append(data[v.name])
             if 'kalman' in v.name:
-                print(f'Drone internal {v.name} = {data[v.name]}')
+                print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
             # if v.name == 'kalman.q0':
             #     internal_kalman[0] = data[v.name]
             # elif v.name == 'kalman.q1':
@@ -275,7 +275,7 @@ def optitrack(queue: Queue, run_process: Value):
                 # quat_y = quat[1]
                 # quat_z = quat[2]
                 # quat_w = quat[3]
-                print(f'Received from Optitrack w = {opti_w} x = {opti_x}, y = {opti_y}, z = {opti_z}')
+                print(f'{current_milli_time()}, Received from Optitrack, w x y z,{opti_w},{opti_x},{opti_y},{opti_z}')
                 quad_x = -opti_x
                 quad_y = -opti_z
                 quad_z = opti_y
@@ -289,10 +289,14 @@ def send_pose(client, queue: Queue):
     while client.is_connected:
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
-        print(f'Sending quat to drone qw = {qw}, qx = {qx}, qy = {qy}, qz = {qz}')
+        print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
         client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
+        # client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
     print('Ending send_pose thread')
+
+def current_milli_time():
+    return round(time.time() * 1000)
 
 if __name__ == '__main__':
     # Initialize everything

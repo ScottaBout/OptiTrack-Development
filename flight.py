@@ -255,21 +255,21 @@ def optitrack(queue: Queue, run_process: Value):
                 quad_y = -opti_z
                 quad_z = opti_y
                 quad_w = opti_w
-                angle = 0
-                global prev_quat
-                if prev_quat is not None:
-                    new_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
-                    rot = new_quat.conj() * prev_quat
-                    norm = np.linalg.norm(quaternion.as_float_array(rot))
-                    if norm != 0:
-                        rot = rot / norm
-                    angle = math.acos(rot.w)
+                # angle = 0
+                # global prev_quat
+                # if prev_quat is not None:
+                #     new_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
+                #     rot = new_quat.conj() * prev_quat
+                #     norm = np.linalg.norm(quaternion.as_float_array(rot))
+                #     if norm != 0:
+                #         rot = rot / norm
+                #     angle = math.acos(rot.w)
                 if queue.empty():
-                    if abs(angle) < 0.5:
+                    if abs(quad_w) > 0.2:
                         queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
                     else:
-                        print(f'Skipped {new_quat} because {prev_quat} has angle {angle}')
-                prev_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
+                        print(f'Skipped because qw = {quad_w}')
+                # prev_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
 
     print('Ending optitrack socket listener')
 
@@ -347,7 +347,7 @@ if __name__ == '__main__':
 
     # Go back to hover (with zero yaw) and prepare to land
     client.move(0.0, 0.0, 0.50, 0.0, 1.0)
-    client.move(0.0, 0.0, 0.15, 0.0, 1.0)
+    client.move(0.0, 0.0, 0.1, 0.0, 1.0)
 
     # Land
     client.stop(1.0)

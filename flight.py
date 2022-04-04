@@ -143,6 +143,9 @@ class SimpleClient:
             self.data[v.name]['data'].append(data[v.name])
             if 'stateEstimate' in v.name:
                 print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
+
+            if 'kalman' in v.name:
+                print(f'{current_milli_time()},Drone internal {v.name},{data[v.name]}')
             # if v.name == 'kalman.q0':
             #     internal_kalman[0] = data[v.name]
             # elif v.name == 'kalman.q1':

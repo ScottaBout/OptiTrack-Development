@@ -248,7 +248,7 @@ def optitrack(queue: Queue, run_process: Value):
                 # quat_y = quat[1]
                 # quat_z = quat[2]
                 # quat_w = quat[3]
-                print(f'{current_milli_time()}, Received from Optitrack, w x y z,{opti_w},{opti_x},{opti_y},{opti_z}')
+                print(f'{current_milli_time()}, Received from Optitrack, w x y z p r y,{opti_w},{opti_x},{opti_y},{opti_z},{j},{h},{i}')
                 quad_x = -opti_x
                 quad_y = -opti_z
                 quad_z = opti_y

@@ -290,7 +290,7 @@ def send_pose(client, queue: Queue):
         x, y, z, qx, qy, qz, qw = queue.get()
         # logging.info(f'sending x = {x}, y = {y}, z = {z}')
         print(f'{current_milli_time()}, Sending quat to drone, qw qx qy qz,{qw},{qx},{qy},{qz}')
-        client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
+        client.cf.extpos.send_extpos(x, y, z) # qx, qy, qz, qw) # or send to controller
         # client.cf.extpos.send_extpose(x, y, z, qx, qy, qz, qw) # or send to controller
         # time.sleep(5)
     print('Ending send_pose thread')
@@ -344,7 +344,7 @@ if __name__ == '__main__':
     # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
 
     client.move(0.0, 0.0, 0.15, 0.0, 2)
-    client.move(0.0, 0.0, 0.25, 45.0, 2)
+    client.move(0.0, 0.0, 0.25, 0.0, 2)
     client.move(0.0, 0.0, 0.5, 0.0, 5)
 
     # Correct positioning and pose

@@ -170,54 +170,14 @@ class SimpleClient:
         time.sleep(0.1)
         self.cf.param.set_value('kalman.resetEstimation', '0')
 
-        # time.sleep(1)
-        #wait_for_position_estimator(cf)
-
     def activate_kalman_estimator(self):
         logging.info('Activating Kalman Filter')
         self.cf.param.set_value('stabilizer.estimator', '2')
 
-        # Set the std deviation for the quaternion data pushed into the
-        # kalman filter. The default value seems to be a bit too low.
+        # Set the std deviation for the quaternion data pushed into the kalman filter.
         self.cf.param.set_value('locSrv.extQuatStdDev', 0.06)
 
 
-# def get_quaternion_from_euler(roll, pitch, yaw):
-#     """
-#     Convert an Euler angle to a quaternion.
-#
-#     Input
-#       :param roll: The roll (rotation around x-axis) angle in degrees.
-#       :param pitch: The pitch (rotation around y-axis) angle in degrees.
-#       :param yaw: The yaw (rotation around z-axis) angle in degrees.
-#
-#     Output
-#       :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
-#     """
-#     # roll = np.deg2rad(roll)
-#     # yaw = np.deg2rad(yaw)
-#     # pitch = np.deg2rad(pitch)
-#     # Create a rotation object from Euler angles specifying axes of rotation
-#     rot = Rotation.from_euler('xyz', [roll, pitch, yaw], degrees=True)
-#     # Convert to quaternions and print
-#     rot_quat = rot.as_quat()
-#     qx = rot_quat[0]
-#     qy = rot_quat[1]
-#     qz = rot_quat[2]
-#     qw = rot_quat[3]
-#
-#     return [qx, qy, qz, qw]
-
-# def get_euler_from_quaternion(q):
-#     yaw = np.arctan2(2 * (q[1] * q[2]+q[0] * q[3]), q[0] * q[0] + q[1] * q[1] - q[2] * q[2] - q[3] * q[3])
-#     yaw = np.rad2deg(yaw)
-#     pitch = np.arcsin(-2 * (q[1] * q[3] - q[0] * q[2]))
-#     pitch = np.rad2deg(pitch)
-#     roll = np.arctan2(2 * (q[2] * q[3]+q[0] * q[1]), q[0] * q[0] - q[1] * q[1] - q[2] * q[2] + q[3] * q[3])
-#     roll = np.rad2deg(roll)
-#
-#     return roll, yaw, pitch ###
-#
 prev_quat = None
 def optitrack(queue: Queue, run_process: Value):
     print('Beginning optitrack socket listener')
@@ -244,32 +204,33 @@ def optitrack(queue: Queue, run_process: Value):
                 pitch = -j
                 bodyID = k
                 framecount = l
-                #print(f'x = {x}, y = {y}, z = {z} \n qx = {opti_x}, qy = {opti_y}, qz = {opti_z}, qw = {opti_w} \n roll = {roll}, yaw = {yaw}, pitch = {pitch} \n bodyID = {bodyID}, framecount = {framecount}')
-                # quat = get_quaternion_from_euler(roll, pitch, yaw) # Convert quaternions from one frame to another quarnon transformation // week or 2 after spring break, x = -x, y = z, z = y
-                # quat_x = quat[0]
-                # quat_y = quat[1]
-                # quat_z = quat[2]
-                # quat_w = quat[3]
                 print(f'{current_milli_time()}, Received from Optitrack, w x y z p r y,{opti_w},{opti_x},{opti_y},{opti_z},{j},{h},{i}')
-                quad_x = -opti_x
-                quad_y = -opti_z
-                quad_z = opti_y
-                quad_w = opti_w
-                # angle = 0
-                # global prev_quat
-                # if prev_quat is not None:
-                #     new_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
-                #     rot = new_quat.conj() * prev_quat
-                #     norm = np.linalg.norm(quaternion.as_float_array(rot))
-                #     if norm != 0:
-                #         rot = rot / norm
-                #     angle = math.acos(rot.w)
+                quat_x = -opti_x
+                quat_y = -opti_z
+                quat_z = opti_y
+                quat_w = opti_w
+                angle = 0
+                global prev_quat
+                if prev_quat is not None:
+                    new_quat = quaternion.from_float_array([quat_w, quat_x, quat_y, quat_z])
+                    rot = new_quat.conj() @ prev_quat
+                    norm = np.linalg.norm(quaternion.as_float_array(rot))
+                    if norm != 0:
+                        rot = rot / norm
+                    angle = math.acos(rot.w)
                 if queue.empty():
-                    if abs(quad_w) > 0.2:
-                        queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+                    if angle > 0.5:
+                        print(f'Skipped because angle = {angle}')
                     else:
-                        print(f'Skipped because qw = {quad_w}')
-                # prev_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
+                        queue.put((x, y, z, quat_x, quat_y, quat_z, quat_w))
+                        prev_quat = quaternion.from_float_array([quat_w, quat_x, quat_y, quat_z])
+
+                # if queue.empty():
+                #     if abs(quad_w) > 0.2:
+                #         queue.put((x, y, z, quad_x, quad_y, quad_z, quad_w))
+                #     else:
+                #         print(f'Skipped because qw = {quad_w}')
+                # # prev_quat = quaternion.from_float_array([quad_w, quad_x, quad_y, quad_z])
 
     print('Ending optitrack socket listener')
 
@@ -317,35 +278,32 @@ if __name__ == '__main__':
 
     # Take off and hover (with zero yaw)
     logging.info('Take off initiated')
-    # logging.info('takeoff hover 0.15')
-    # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
-    # #time.sleep(1.0)
-    # logging.info('takeoff hover 0.5')
-    # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
-    # logging.info('takeoff hover 0.5')
-    # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.5)
-    # logging.info('landing hover 0.25')
-    # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.25)
-    # logging.info('landing hover 0.15')
-    # client.cf.commander.send_hover_setpoint(0, 0, 0, 0.15)
-
+    
     client.move(0.0, 0.0, 0.15, 0.0, 2)
     client.move(0.0, 0.0, 0.25, 0.0, 2)
     client.move(0.0, 0.0, 0.5, 0.0, 5)
 
-    # Correct positioning and pose
-    # logging.info('Beginning move')
-    # client.move(0.0, 0.0, 0.50, 0.0, 5.0)
-
     # Fly in a square five times (with a pause at each corner)
-    num_squares = 1
-    for i in range(num_squares):
-        client.move(0.75, 0.0, 0.5, 0.0, 2.0)
-        client.move(0.75, 0.75, 0.5, 0.0, 2.0)
-        client.move(0.0, 0.75, 0.5, 0.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 0.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 45.0, 2.0)
-        client.move(0.0, 0.0, 0.5, 0.0, 2.0)
+    # num_squares = 1
+    # for i in range(num_squares):
+    #     client.move(0.75, 0.0, 0.5, 0.0, 2.0)
+    #     client.move(0.75, 0.75, 0.5, 0.0, 2.0)
+    #     client.move(0.0, 0.75, 0.5, 0.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 0.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 45.0, 2.0)
+    #     client.move(0.0, 0.0, 0.5, 0.0, 2.0)
+
+    # Fly in a spiral
+    client.move(1, 0, 1, 0)
+    for step in range(100):
+        sp_angle = 6 * math.pi * step / 100
+        radius = 0.75 - 0.4 * step / 100
+        x = math.cos(sp_angle) * radius
+        y = math.sin(sp_angle) * radius
+        yaw = (3 * 360 * step / 100) % 360
+        height = 1.0 - 0.7 * step / 100
+        dt = 0.2 - 0.1 * step / 100
+        client.move(x, y, height, yaw, dt)
 
     # Go back to hover (with zero yaw) and prepare to land
     client.move(0.0, 0.0, 0.50, 0.0, 1.0)

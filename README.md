@@ -1,5 +1,5 @@
 # OptiTrack-Development
-Develop Optitrack lesson modules for AE 483.
+Develop Optitrack lesson modules for AE 483 at the University of Illinois at Urbana-Champaign.
 The flight.py file is taken directly from AE 483 class. The task is to integrate OptiTrack into this file with the least amount of
 modifications to this file. It is written in Python 3.
 
